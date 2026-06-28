@@ -1,11 +1,14 @@
-export const runtime = "edge";
-
-const SUPPORTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const DEFAULT_MAX_UPLOAD_MB = 10;
+type Env = {
+  REMOVEBG_API_KEY?: string;
+  MAX_UPLOAD_MB?: string;
+};
 
 type ErrorBody = {
   error: string;
 };
+
+const SUPPORTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const DEFAULT_MAX_UPLOAD_MB = 10;
 
 function jsonError(message: string, status: number) {
   return Response.json({ error: message } satisfies ErrorBody, {
@@ -16,8 +19,8 @@ function jsonError(message: string, status: number) {
   });
 }
 
-function getMaxUploadBytes() {
-  const configured = Number(process.env.MAX_UPLOAD_MB);
+function getMaxUploadBytes(env: Env) {
+  const configured = Number(env.MAX_UPLOAD_MB);
   const maxMb =
     Number.isFinite(configured) && configured > 0
       ? configured
@@ -49,10 +52,8 @@ async function readRemoveBgError(response: Response) {
   }
 }
 
-export async function POST(request: Request) {
-  const apiKey = process.env.REMOVEBG_API_KEY;
-
-  if (!apiKey) {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  if (!env.REMOVEBG_API_KEY) {
     return jsonError("Remove.bg API key is not configured.", 500);
   }
 
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
     return jsonError("Supported formats are JPG, PNG, and WebP.", 400);
   }
 
-  if (image.size > getMaxUploadBytes()) {
+  if (image.size > getMaxUploadBytes(env)) {
     return jsonError("Image is too large. Please upload a file under 10 MB.", 413);
   }
 
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
     removeBgResponse = await fetch("https://api.remove.bg/v1.0/removebg", {
       method: "POST",
       headers: {
-        "X-Api-Key": apiKey,
+        "X-Api-Key": env.REMOVEBG_API_KEY,
       },
       body: removeBgForm,
     });
@@ -112,4 +113,7 @@ export async function POST(request: Request) {
       "Cache-Control": "no-store",
     },
   });
-}
+};
+
+export const onRequest: PagesFunction<Env> = () =>
+  jsonError("Method not allowed.", 405);
