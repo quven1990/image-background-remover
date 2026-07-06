@@ -27,6 +27,13 @@ type GoogleUserInfo = {
   picture?: string;
 };
 
+function getFailureRedirect(authBaseUrl: string, reason: string) {
+  return Response.redirect(
+    `${authBaseUrl}/?auth=failed&reason=${encodeURIComponent(reason)}`,
+    302,
+  );
+}
+
 async function exchangeCode(
   request: Request,
   env: AuthEnv,
@@ -51,6 +58,11 @@ async function exchangeCode(
   const payload = (await response.json().catch(() => ({}))) as GoogleTokenResponse;
 
   if (!response.ok) {
+    console.error("Google OAuth token exchange failed", {
+      status: response.status,
+      error: payload.error,
+      errorDescription: payload.error_description,
+    });
     throw new Error(
       payload.error_description || payload.error || "Google token exchange failed.",
     );
@@ -69,6 +81,7 @@ async function fetchGoogleUser(accessToken: string): Promise<GoogleUserInfo> {
   const payload = (await response.json().catch(() => ({}))) as GoogleUserInfo;
 
   if (!response.ok) {
+    console.error("Google OAuth userinfo failed", { status: response.status });
     throw new Error("Could not read Google profile.");
   }
 
@@ -113,13 +126,17 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
     return Response.redirect(`${authBaseUrl}/?auth=expired`, 302);
   }
 
+  let failureReason = "unknown";
+
   try {
+    failureReason = "token_exchange";
     const token = await exchangeCode(request, env, code);
 
     if (!token.access_token) {
       throw new Error("Google did not return an access token.");
     }
 
+    failureReason = "profile";
     const profile = await fetchGoogleUser(token.access_token);
 
     if (!profile.sub || !profile.email) {
@@ -130,6 +147,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
     const userId = randomToken(18);
     const displayName = profile.name || profile.email.split("@")[0];
 
+    failureReason = "upsert_user";
     await env.DB.prepare(
       `INSERT INTO users (
         id,
@@ -161,6 +179,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
       )
       .run();
 
+    failureReason = "select_user";
     const user = await env.DB.prepare("SELECT id FROM users WHERE email = ? LIMIT 1")
       .bind(profile.email)
       .first<{ id: string }>();
@@ -174,6 +193,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
         ? new Date(Date.now() + token.expires_in * 1000).toISOString()
         : null;
 
+    failureReason = "upsert_oauth_account";
     await env.DB.prepare(
       `INSERT INTO oauth_accounts (
         provider,
@@ -208,6 +228,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
       Date.now() + getSessionTtlDays(env) * 24 * 60 * 60 * 1000,
     );
 
+    failureReason = "create_session";
     await env.DB.prepare(
       `INSERT INTO sessions (
         id,
@@ -231,6 +252,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
       )
       .run();
 
+    failureReason = "cleanup_sessions";
     await env.DB.prepare("DELETE FROM sessions WHERE expires_at <= ?")
       .bind(new Date().toISOString())
       .run();
@@ -243,8 +265,13 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
     );
 
     return response;
-  } catch {
-    return Response.redirect(`${authBaseUrl}/?auth=failed`, 302);
+  } catch (error) {
+    console.error("Google OAuth callback failed", {
+      reason: failureReason,
+      message: error instanceof Error ? error.message : String(error),
+    });
+
+    return getFailureRedirect(authBaseUrl, failureReason);
   }
 };
 
