@@ -232,6 +232,11 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({
       Date.now() + getSessionTtlDays(env) * 24 * 60 * 60 * 1000,
     );
 
+    failureReason = "delete_existing_sessions";
+    await env.DB.prepare("DELETE FROM sessions WHERE user_id = ?")
+      .bind(user.id)
+      .run();
+
     failureReason = "create_session";
     await env.DB.prepare(
       `INSERT INTO sessions (
@@ -256,6 +261,14 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({
       )
       .run();
 
+    failureReason = "build_response";
+    const redirectPath = getSafeRedirectPath(stateRow.redirectPath);
+    const response = Response.redirect(`${authBaseUrl}${redirectPath}`, 302);
+    response.headers.append(
+      "Set-Cookie",
+      createSessionCookie(request, sessionToken, expiresAt),
+    );
+
     waitUntil(
       env.DB.prepare("DELETE FROM sessions WHERE expires_at <= ?")
         .bind(new Date().toISOString())
@@ -265,13 +278,6 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({
             message: error instanceof Error ? error.message : String(error),
           });
         }),
-    );
-
-    const redirectPath = getSafeRedirectPath(stateRow.redirectPath);
-    const response = Response.redirect(`${authBaseUrl}${redirectPath}`, 302);
-    response.headers.append(
-      "Set-Cookie",
-      createSessionCookie(request, sessionToken, expiresAt),
     );
 
     return response;
