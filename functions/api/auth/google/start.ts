@@ -9,8 +9,18 @@ const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const STATE_TTL_MINUTES = 10;
 
 export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => {
-  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
-    return jsonError("Google OAuth is not configured.", 500);
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const clientSecret = env.GOOGLE_CLIENT_SECRET;
+  const missingConfig = [
+    !clientId ? "GOOGLE_CLIENT_ID" : null,
+    !clientSecret ? "GOOGLE_CLIENT_SECRET" : null,
+  ].filter(Boolean);
+
+  if (!clientId || !clientSecret) {
+    return jsonError(
+      `Google OAuth is not configured. Missing: ${missingConfig.join(", ")}.`,
+      500,
+    );
   }
 
   const requestUrl = new URL(request.url);
@@ -31,7 +41,7 @@ export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => 
     .run();
 
   const authUrl = new URL(GOOGLE_AUTH_URL);
-  authUrl.searchParams.set("client_id", env.GOOGLE_CLIENT_ID);
+  authUrl.searchParams.set("client_id", clientId);
   authUrl.searchParams.set(
     "redirect_uri",
     `${requestUrl.origin}/api/auth/google/callback`,

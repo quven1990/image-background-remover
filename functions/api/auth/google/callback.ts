@@ -75,8 +75,18 @@ async function fetchGoogleUser(accessToken: string): Promise<GoogleUserInfo> {
 }
 
 export const onRequestGet: PagesFunction<AuthEnv> = async ({ request, env }) => {
-  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
-    return jsonError("Google OAuth is not configured.", 500);
+  const clientId = env.GOOGLE_CLIENT_ID;
+  const clientSecret = env.GOOGLE_CLIENT_SECRET;
+  const missingConfig = [
+    !clientId ? "GOOGLE_CLIENT_ID" : null,
+    !clientSecret ? "GOOGLE_CLIENT_SECRET" : null,
+  ].filter(Boolean);
+
+  if (!clientId || !clientSecret) {
+    return jsonError(
+      `Google OAuth is not configured. Missing: ${missingConfig.join(", ")}.`,
+      500,
+    );
   }
 
   const requestUrl = new URL(request.url);
