@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "image-background-remover-auth",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "56d94e55-0b18-43fc-8a05-e749b47168bd",
       "migrations_dir": "migrations"
     }
   ],
