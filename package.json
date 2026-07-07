@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "deploy": "npm run build && wrangler pages deploy out --project-name=image-background-remover --commit-dirty=true"
+    "migrate:remote": "wrangler d1 migrations apply image-background-remover-auth --remote",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "lucide-react": "^1.21.0",
