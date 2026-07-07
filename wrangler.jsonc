@@ -1,19 +1,34 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "image-background-remover",
-  "pages_build_output_dir": "./out",
-  "compatibility_date": "2026-07-06",
+  "account_id": "faae494a756090f5f9c0ad7b8d1ddb88",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-07-07",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "routes": [
+    {
+      "pattern": "imagebackgroundremover.shop/*",
+      "zone_name": "imagebackgroundremover.shop"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "image-background-remover-auth",
-      "database_id": "56d94e55-0b18-43fc-8a05-e749b47168bd",
+      "database_id": "6e30418d-3ff7-4bb4-86ee-7c31c63e4dd7",
       "migrations_dir": "migrations"
     }
   ],
   "vars": {
     "MAX_UPLOAD_MB": "10",
     "GOOGLE_CLIENT_ID": "733757166908-3182cjuil0qtgj4r7g7j1nqh896u1b3m.apps.googleusercontent.com",
-    "AUTH_BASE_URL": "https://image-background-remover-a0x.pages.dev"
+    "AUTH_BASE_URL": "https://imagebackgroundremover.shop",
+    "PAYPAL_CLIENT_ID": "AWpItvsSz5htPWbkgAkzqJXxISN8ei-pGt2kFDPlMfr_T17DMnTkLU0_xM3GFBlUyBmPsBs0PXMfQ2AV",
+    "PAYPAL_ENVIRONMENT": "sandbox"
   }
 }
