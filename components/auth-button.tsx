@@ -79,17 +79,17 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden max-w-[180px] items-center gap-2 truncate text-sm font-medium text-slate-700 sm:inline-flex">
+      <span className="inline-flex h-10 max-w-[170px] items-center gap-2 truncate rounded-md border border-line bg-white px-2.5 text-sm font-semibold text-ink sm:max-w-[220px]">
         {user.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt=""
-            className="h-7 w-7 rounded-full"
+            className="h-7 w-7 shrink-0 rounded-full"
             referrerPolicy="no-referrer"
             src={user.avatarUrl}
           />
         ) : (
-          <UserCircle aria-hidden="true" size={22} />
+          <UserCircle aria-hidden="true" className="shrink-0" size={22} />
         )}
         <span className="truncate">{user.name}</span>
       </span>
