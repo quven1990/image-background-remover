@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "image-background-remover",
-  "account_id": "faae494a756090f5f9c0ad7b8d1ddb88",
+  "account_id": "a17c720d27e1e3b502bef6b0d57c5472",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-07-07",
   "workers_dev": true,
@@ -20,7 +20,7 @@
     {
       "binding": "DB",
       "database_name": "image-background-remover-auth",
-      "database_id": "6e30418d-3ff7-4bb4-86ee-7c31c63e4dd7",
+      "database_id": "56d94e55-0b18-43fc-8a05-e749b47168bd",
       "migrations_dir": "migrations"
     }
   ],
