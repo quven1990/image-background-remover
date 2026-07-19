@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthButton } from "@/components/auth-button";
 import { BackgroundRemoverTool } from "@/components/background-remover-tool";
 
 const useCases = [
@@ -16,7 +17,8 @@ const faqs = [
   },
   {
     question: "Do I need to create an account?",
-    answer: "No account is required for the upload and download flow.",
+    answer:
+      "No account is required for the upload and download flow. You can sign in with Google so the app can store your login session in D1.",
   },
   {
     question: "Are my images stored?",
@@ -53,6 +55,7 @@ export default function Home() {
             <a className="transition hover:text-ink" href="#privacy">
               Privacy
             </a>
+            <AuthButton />
           </nav>
         </div>
       </header>
