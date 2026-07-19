@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { AuthButton } from "@/components/auth-button";
 import { BackgroundRemoverTool } from "@/components/background-remover-tool";
-import { CreditStatus } from "@/components/credit-status";
 
 const useCases = [
   "Product photos",
@@ -18,8 +16,7 @@ const faqs = [
   },
   {
     question: "Do I need to create an account?",
-    answer:
-      "You can sign in with Google so the app can keep login sessions in D1. The upload and download flow can still stay lightweight.",
+    answer: "No account is required for the upload and download flow.",
   },
   {
     question: "Are my images stored?",
@@ -50,16 +47,12 @@ export default function Home() {
             Image Background Remover
           </Link>
           <nav className="flex items-center gap-4 text-sm text-slate-600">
-            <Link className="transition hover:text-ink" href="/pricing">
-              Pricing
-            </Link>
             <a className="transition hover:text-ink" href="#faq">
               FAQ
             </a>
             <a className="transition hover:text-ink" href="#privacy">
               Privacy
             </a>
-            <AuthButton />
           </nav>
         </div>
       </header>
@@ -88,10 +81,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <CreditStatus compact />
-          <BackgroundRemoverTool />
-        </div>
+        <BackgroundRemoverTool />
       </section>
 
       <section className="border-y border-line bg-white" id="privacy">

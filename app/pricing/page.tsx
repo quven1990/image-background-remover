@@ -1,7 +1,5 @@
 import { ArrowRight, Check, CreditCard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { AuthButton } from "@/components/auth-button";
-import { CreditStatus } from "@/components/credit-status";
 
 const plans = [
   {
@@ -101,7 +99,6 @@ export default function PricingPage() {
             <Link className="transition hover:text-ink" href="/#faq">
               FAQ
             </Link>
-            <AuthButton />
           </nav>
         </div>
       </header>
@@ -118,10 +115,6 @@ export default function PricingPage() {
             Start free, then upgrade when you need more clean cutouts for
             product photos, portraits, logos, and social posts.
           </p>
-        </div>
-
-        <div className="mt-8">
-          <CreditStatus />
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -162,7 +155,7 @@ export default function PricingPage() {
               {plan.planId === "free" ? (
                 <Link
                   className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-bold text-ink transition hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-mint"
-                  href="/api/auth/google/start?redirect=/pricing"
+                  href="/"
                 >
                   {plan.cta}
                   <ArrowRight aria-hidden="true" size={17} />
